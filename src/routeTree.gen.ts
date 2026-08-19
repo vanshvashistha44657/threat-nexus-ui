@@ -16,12 +16,14 @@ import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedAssetManagementRouteImport } from './routes/_authenticated/asset-management'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated/assets'
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDetectionRulesRouteImport } from './routes/_authenticated/detection-rules'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedIocRouteImport } from './routes/_authenticated/ioc'
+import { Route as AuthenticatedIocManagementRouteImport } from './routes/_authenticated/ioc-management'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
@@ -63,6 +65,12 @@ const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAssetManagementRoute =
+  AuthenticatedAssetManagementRouteImport.update({
+    id: '/asset-management',
+    path: '/asset-management',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
@@ -94,6 +102,12 @@ const AuthenticatedIocRoute = AuthenticatedIocRouteImport.update({
   path: '/ioc',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIocManagementRoute =
+  AuthenticatedIocManagementRouteImport.update({
+    id: '/ioc-management',
+    path: '/ioc-management',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -135,12 +149,14 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
+  '/asset-management': typeof AuthenticatedAssetManagementRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/ioc-management': typeof AuthenticatedIocManagementRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -155,12 +171,14 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
+  '/asset-management': typeof AuthenticatedAssetManagementRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/ioc-management': typeof AuthenticatedIocManagementRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -177,12 +195,14 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
+  '/_authenticated/asset-management': typeof AuthenticatedAssetManagementRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/ioc': typeof AuthenticatedIocRoute
+  '/_authenticated/ioc-management': typeof AuthenticatedIocManagementRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
@@ -199,12 +219,14 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/alerts'
+    | '/asset-management'
     | '/assets'
     | '/cases'
     | '/dashboard'
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/ioc-management'
     | '/notifications'
     | '/profile'
     | '/reports'
@@ -219,12 +241,14 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/alerts'
+    | '/asset-management'
     | '/assets'
     | '/cases'
     | '/dashboard'
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/ioc-management'
     | '/notifications'
     | '/profile'
     | '/reports'
@@ -240,12 +264,14 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/admin'
     | '/_authenticated/alerts'
+    | '/_authenticated/asset-management'
     | '/_authenticated/assets'
     | '/_authenticated/cases'
     | '/_authenticated/dashboard'
     | '/_authenticated/detection-rules'
     | '/_authenticated/incidents'
     | '/_authenticated/ioc'
+    | '/_authenticated/ioc-management'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
     | '/_authenticated/reports'
@@ -313,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/asset-management': {
+      id: '/_authenticated/asset-management'
+      path: '/asset-management'
+      fullPath: '/asset-management'
+      preLoaderRoute: typeof AuthenticatedAssetManagementRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/assets': {
       id: '/_authenticated/assets'
       path: '/assets'
@@ -353,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/ioc'
       fullPath: '/ioc'
       preLoaderRoute: typeof AuthenticatedIocRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ioc-management': {
+      id: '/_authenticated/ioc-management'
+      path: '/ioc-management'
+      fullPath: '/ioc-management'
+      preLoaderRoute: typeof AuthenticatedIocManagementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications': {
@@ -403,12 +443,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
+  AuthenticatedAssetManagementRoute: typeof AuthenticatedAssetManagementRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDetectionRulesRoute: typeof AuthenticatedDetectionRulesRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedIocRoute: typeof AuthenticatedIocRoute
+  AuthenticatedIocManagementRoute: typeof AuthenticatedIocManagementRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -420,12 +462,14 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
+  AuthenticatedAssetManagementRoute: AuthenticatedAssetManagementRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDetectionRulesRoute: AuthenticatedDetectionRulesRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedIocRoute: AuthenticatedIocRoute,
+  AuthenticatedIocManagementRoute: AuthenticatedIocManagementRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
