@@ -20,11 +20,7 @@ const shell = existsSync(join(out, "_shell.html"))
   : join(out, "index.html");
 copyFileSync(shell, join(out, "404.html"));
 
-for (const cname of [join(process.cwd(), "public", "CNAME"), join(process.cwd(), "docs", "CNAME")]) {
-  if (existsSync(cname)) {
-    copyFileSync(cname, join(out, "CNAME"));
-    break;
-  }
-}
+const cname = join(process.cwd(), "public", "CNAME");
+if (existsSync(cname)) copyFileSync(cname, join(out, "CNAME"));
 
 console.log("GitHub Pages post-build complete:", out);
