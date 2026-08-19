@@ -97,14 +97,14 @@ function DashboardPage() {
       {m && (
         <>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard label="Critical alerts" value={m.criticalAlerts} icon={Siren} tone="critical" delta={12} hint="last 24h" />
-            <MetricCard label="High alerts" value={m.highAlerts} icon={ShieldAlert} tone="high" delta={4} hint="last 24h" />
-            <MetricCard label="Open incidents" value={m.openIncidents} icon={ServerCrash} tone="medium" delta={-8} hint="active response" />
+            <MetricCard label="Critical alerts" value={m.criticalAlerts} icon={Siren} tone="critical" delta={m.trends?.criticalAlerts} hint="last 24h" />
+            <MetricCard label="High alerts" value={m.highAlerts} icon={ShieldAlert} tone="high" delta={m.trends?.highAlerts} hint="last 24h" />
+            <MetricCard label="Open incidents" value={m.openIncidents} icon={ServerCrash} tone="medium" delta={m.trends?.openIncidents} hint="active response" />
             <MetricCard label="Active cases" value={m.activeCases} icon={BriefcaseBusiness} hint="under investigation" />
             <MetricCard label="IOC matches" value={m.iocMatches} icon={Fingerprint} tone="high" hint="observed on estate" />
             <MetricCard label="Assets at risk" value={m.assetsAtRisk} icon={Gauge} tone="medium" hint="risk score > 70" />
-            <MetricCard label="MTTR" value={`${m.mttrMinutes}m`} icon={Activity} tone="success" delta={-15} hint="mean time to respond" />
-            <MetricCard label="False positive rate" value={`${m.falsePositiveRate}%`} icon={Activity} tone="success" delta={-3} hint="30-day rolling" />
+            <MetricCard label="MTTR" value={`${m.mttrMinutes}m`} icon={Activity} tone="success" delta={m.trends?.mttrMinutes} hint="mean time to respond" />
+            <MetricCard label="False positive rate" value={`${m.falsePositiveRate}%`} icon={Activity} tone="success" delta={m.trends?.falsePositiveRate} hint="30-day rolling" />
           </div>
 
           <div className="grid gap-3 xl:grid-cols-3">

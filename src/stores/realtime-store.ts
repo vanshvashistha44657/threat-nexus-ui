@@ -7,7 +7,7 @@ export type ConnectionStatus = "connected" | "reconnecting" | "disconnected";
 export interface LiveEvent {
   id: string;
   at: string;
-  kind: "alert" | "incident" | "ioc" | "notification" | "intel" | "system";
+  kind: "alert" | "incident" | "ioc" | "notification" | "intel" | "system" | "session" | "user";
   severity: Severity;
   message: string;
   detail: string;

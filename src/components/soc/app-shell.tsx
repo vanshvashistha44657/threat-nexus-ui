@@ -41,27 +41,28 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import { useUiStore } from "@/stores/ui-store";
 import { connectRealtime } from "@/services/realtime";
-import { IS_LIVE_BACKEND } from "@/services";
+import { API_BASE_URL, getDataMode, services, subscribeDataMode, type DataMode } from "@/services";
+import { canAccessModule, type ModuleKey } from "@/lib/rbac";
 import { NotificationCenter } from "./notification-center";
-import { Chip } from "./badges";
+import { Chip, type BadgeTone } from "./badges";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/alerts", label: "Alerts", icon: Siren },
-  { to: "/incidents", label: "Incidents", icon: ShieldAlert },
-  { to: "/cases", label: "Cases", icon: FileText },
-  { to: "/threat-hunting", label: "Threat Hunting", icon: Crosshair },
-  { to: "/detection-rules", label: "Detection Rules", icon: Bug },
-  { to: "/ioc", label: "IOC Management", icon: Fingerprint },
-  { to: "/threat-intelligence", label: "Threat Intelligence", icon: Radar },
-  { to: "/assets", label: "Asset Management", icon: Server },
-  { to: "/reports", label: "Reports", icon: BarChart3 },
-  { to: "/notifications", label: "Notifications", icon: Bell },
-  { to: "/admin", label: "Admin Portal", icon: UserCog, permission: "admin:access" },
-  { to: "/settings", label: "Settings", icon: Settings },
-  { to: "/profile", label: "Profile", icon: UserIcon },
+export const NAV_ITEMS: { to: string; label: string; icon: typeof Shield; module: ModuleKey }[] = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, module: "dashboard" },
+  { to: "/alerts", label: "Alerts", icon: Siren, module: "alerts" },
+  { to: "/incidents", label: "Incidents", icon: ShieldAlert, module: "incidents" },
+  { to: "/cases", label: "Cases", icon: FileText, module: "cases" },
+  { to: "/threat-hunting", label: "Threat Hunting", icon: Crosshair, module: "threat-hunting" },
+  { to: "/detection-rules", label: "Detection Rules", icon: Bug, module: "detection-rules" },
+  { to: "/ioc", label: "IOC Management", icon: Fingerprint, module: "ioc" },
+  { to: "/threat-intelligence", label: "Threat Intelligence", icon: Radar, module: "threat-intelligence" },
+  { to: "/assets", label: "Asset Management", icon: Server, module: "assets" },
+  { to: "/reports", label: "Reports", icon: BarChart3, module: "reports" },
+  { to: "/notifications", label: "Notifications", icon: Bell, module: "notifications" },
+  { to: "/admin", label: "Admin Portal", icon: UserCog, module: "admin" },
+  { to: "/settings", label: "Settings", icon: Settings, module: "settings" },
+  { to: "/profile", label: "Profile", icon: UserIcon, module: "profile" },
 ] as const;
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
@@ -83,12 +84,11 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
 }
 
 function NavList({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
-  const has = useAuthStore((s) => s.has);
+  const role = useAuthStore((s) => s.user?.role);
   return (
     <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-4">
       {NAV_ITEMS.map((item) => {
-        const locked = "permission" in item && item.permission && !has(item.permission);
-        if (locked) return null;
+        if (!canAccessModule(role, item.module)) return null;
         const Icon = item.icon;
         return (
           <Link
@@ -132,6 +132,39 @@ function ConnectionPill() {
       <span className={cn("size-1.5 rounded-full bg-current", status === "connected" && "live-dot")} />
       {label}
     </span>
+  );
+}
+
+/** Shows whether the UI is reading the FastAPI backend or the seeded dataset. */
+function DataModePill() {
+  const [mode, setMode] = useState<DataMode>(getDataMode());
+  useEffect(() => {
+    const unsub = subscribeDataMode(setMode);
+    return () => {
+      unsub();
+    };
+  }, []);
+  const copy: Record<DataMode, { label: string; tone: BadgeTone; help: string }> = {
+    live: { label: "LIVE API", tone: "success", help: `Reading the SentinelOps FastAPI backend at ${API_BASE_URL}.` },
+    degraded: {
+      label: "API OFFLINE",
+      tone: "medium",
+      help: `${API_BASE_URL} is unreachable — serving the seeded dataset so the SOC stays usable. Start the FastAPI service to switch back automatically.`,
+    },
+    demo: { label: "DEMO MODE", tone: "info", help: "No backend configured (VITE_API_BASE_URL) — seeded demonstration dataset." },
+  };
+  const c = copy[mode];
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="hidden sm:inline-flex">
+          <Chip tone={c.tone} className="mono">
+            <Gauge className="size-3" /> {c.label}
+          </Chip>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">{c.help}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -196,14 +229,17 @@ function UserMenu() {
         <DropdownMenuItem onClick={() => void navigate({ to: "/profile" })}>
           <UserIcon className="size-4" /> Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void navigate({ to: "/settings" })}>
-          <Settings className="size-4" /> Settings
-        </DropdownMenuItem>
+        {canAccessModule(user.role, "settings") ? (
+          <DropdownMenuItem onClick={() => void navigate({ to: "/settings" })}>
+            <Settings className="size-4" /> Settings
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive"
           onClick={async () => {
             await qc.cancelQueries();
+            await services.auth.logout();
             qc.clear();
             logout();
             toast.success("Signed out of SentinelOps");
@@ -237,11 +273,35 @@ function useRealtimeBridge() {
           }
         }
         if (event.kind === "ioc") void qc.invalidateQueries({ queryKey: ["iocs"] });
-        if (event.kind === "incident") void qc.invalidateQueries({ queryKey: ["incidents"] });
+        if (event.kind === "incident") {
+          void qc.invalidateQueries({ queryKey: ["incidents"] });
+          void qc.invalidateQueries({ queryKey: ["cases"] });
+          void qc.invalidateQueries({ queryKey: ["dashboard"] });
+        }
+        if (event.kind === "session" || event.kind === "user") {
+          void qc.invalidateQueries({ queryKey: ["admin"] });
+        }
       },
     });
     return stop;
   }, [setStatus, push, qc]);
+
+  // Session heartbeat: keeps `last_activity` fresh so the Admin Portal's
+  // active-user view reflects reality, and refreshes the roster in place.
+  useEffect(() => {
+    let cancelled = false;
+    const beat = async () => {
+      if (document.visibilityState === "hidden") return;
+      await services.auth.heartbeat();
+      if (!cancelled) void qc.invalidateQueries({ queryKey: ["admin", "active-sessions"] });
+    };
+    void beat();
+    const id = setInterval(() => void beat(), 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [qc]);
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -295,20 +355,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <GlobalSearch />
 
               <div className="ml-auto flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="hidden sm:inline-flex">
-                      <Chip tone="info" className="mono">
-                        <Gauge className="size-3" /> {IS_LIVE_BACKEND ? "PRODUCTION" : "DEMO MODE"}
-                      </Chip>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {IS_LIVE_BACKEND
-                      ? "Connected to the configured SentinelOps FastAPI backend."
-                      : "Seeded demonstration dataset — no live backend configured (VITE_API_BASE_URL)."}
-                  </TooltipContent>
-                </Tooltip>
+                <DataModePill />
                 <ConnectionPill />
                 <NotificationCenter />
                 {user && (
