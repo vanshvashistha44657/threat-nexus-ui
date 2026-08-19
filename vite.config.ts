@@ -13,6 +13,8 @@ const rawBase = process.env["BASE_PATH"] ?? "/";
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
 export default defineConfig({
+  // Static build (GitHub Pages): no server runtime, just prerendered SPA shell + assets.
+  ...(STATIC ? { nitro: false as const } : {}),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this. Skipped for the static (GitHub Pages) build, where the
