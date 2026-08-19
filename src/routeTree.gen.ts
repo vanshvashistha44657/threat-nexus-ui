@@ -22,6 +22,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDetectionRulesRouteImport } from './routes/_authenticated/detection-rules'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedIocRouteImport } from './routes/_authenticated/ioc'
+import { Route as AuthenticatedIocManagementRouteImport } from './routes/_authenticated/ioc-management'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
@@ -94,6 +95,12 @@ const AuthenticatedIocRoute = AuthenticatedIocRouteImport.update({
   path: '/ioc',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIocManagementRoute =
+  AuthenticatedIocManagementRouteImport.update({
+    id: '/ioc-management',
+    path: '/ioc-management',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/ioc-management': typeof AuthenticatedIocManagementRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -161,6 +169,7 @@ export interface FileRoutesByTo {
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/ioc-management': typeof AuthenticatedIocManagementRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -183,6 +192,7 @@ export interface FileRoutesById {
   '/_authenticated/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/ioc': typeof AuthenticatedIocRoute
+  '/_authenticated/ioc-management': typeof AuthenticatedIocManagementRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/ioc-management'
     | '/notifications'
     | '/profile'
     | '/reports'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/ioc-management'
     | '/notifications'
     | '/profile'
     | '/reports'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/detection-rules'
     | '/_authenticated/incidents'
     | '/_authenticated/ioc'
+    | '/_authenticated/ioc-management'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
     | '/_authenticated/reports'
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIocRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ioc-management': {
+      id: '/_authenticated/ioc-management'
+      path: '/ioc-management'
+      fullPath: '/ioc-management'
+      preLoaderRoute: typeof AuthenticatedIocManagementRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -409,6 +429,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDetectionRulesRoute: typeof AuthenticatedDetectionRulesRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedIocRoute: typeof AuthenticatedIocRoute
+  AuthenticatedIocManagementRoute: typeof AuthenticatedIocManagementRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -426,6 +447,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDetectionRulesRoute: AuthenticatedDetectionRulesRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedIocRoute: AuthenticatedIocRoute,
+  AuthenticatedIocManagementRoute: AuthenticatedIocManagementRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
