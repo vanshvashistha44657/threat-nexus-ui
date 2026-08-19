@@ -17,7 +17,9 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDetectionRulesRouteImport } from './routes/_authenticated/detection-rules'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
+import { Route as AuthenticatedThreatHuntingRouteImport } from './routes/_authenticated/threat-hunting'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,11 +60,23 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDetectionRulesRoute =
+  AuthenticatedDetectionRulesRouteImport.update({
+    id: '/detection-rules',
+    path: '/detection-rules',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedIncidentsRoute = AuthenticatedIncidentsRouteImport.update({
   id: '/incidents',
   path: '/incidents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedThreatHuntingRoute =
+  AuthenticatedThreatHuntingRouteImport.update({
+    id: '/threat-hunting',
+    path: '/threat-hunting',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,7 +86,9 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AuthenticatedAlertsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
+  '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,7 +98,9 @@ export interface FileRoutesByTo {
   '/alerts': typeof AuthenticatedAlertsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
+  '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +112,9 @@ export interface FileRoutesById {
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
+  '/_authenticated/threat-hunting': typeof AuthenticatedThreatHuntingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,7 +126,9 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/cases'
     | '/dashboard'
+    | '/detection-rules'
     | '/incidents'
+    | '/threat-hunting'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -116,7 +138,9 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/cases'
     | '/dashboard'
+    | '/detection-rules'
     | '/incidents'
+    | '/threat-hunting'
   id:
     | '__root__'
     | '/'
@@ -127,7 +151,9 @@ export interface FileRouteTypes {
     | '/_authenticated/alerts'
     | '/_authenticated/cases'
     | '/_authenticated/dashboard'
+    | '/_authenticated/detection-rules'
     | '/_authenticated/incidents'
+    | '/_authenticated/threat-hunting'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,11 +222,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/detection-rules': {
+      id: '/_authenticated/detection-rules'
+      path: '/detection-rules'
+      fullPath: '/detection-rules'
+      preLoaderRoute: typeof AuthenticatedDetectionRulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/incidents': {
       id: '/_authenticated/incidents'
       path: '/incidents'
       fullPath: '/incidents'
       preLoaderRoute: typeof AuthenticatedIncidentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/threat-hunting': {
+      id: '/_authenticated/threat-hunting'
+      path: '/threat-hunting'
+      fullPath: '/threat-hunting'
+      preLoaderRoute: typeof AuthenticatedThreatHuntingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -210,14 +250,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDetectionRulesRoute: typeof AuthenticatedDetectionRulesRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
+  AuthenticatedThreatHuntingRoute: typeof AuthenticatedThreatHuntingRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDetectionRulesRoute: AuthenticatedDetectionRulesRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
+  AuthenticatedThreatHuntingRoute: AuthenticatedThreatHuntingRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
