@@ -148,14 +148,23 @@ export const ADMIN_EMAIL: string =
 const auth = {
   async login({ email, password }: LoginPayload): Promise<{ user: AuthUser; token: string }> {
     if (IS_LIVE_BACKEND) {
-      const res = await apiFetch<{ access_token: string; user: User }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ username: email, password }),
-      });
-      return {
-        token: res.access_token,
-        user: { ...res.user, permissions: permissionsFor(res.user.role) },
-      };
+      try {
+        const res = await apiFetch<{ access_token: string; user: User }>("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ username: email, password }),
+        });
+        setDataMode("live");
+        return {
+          token: res.access_token,
+          user: { ...res.user, permissions: permissionsFor(res.user.role) },
+        };
+      } catch (error) {
+        const status = error instanceof ApiError ? error.status : -1;
+        // Rejected credentials must surface; an unreachable API falls through
+        // to the seeded dataset so the console stays demonstrable.
+        if (!FALLBACK_STATUSES.includes(status)) throw error;
+        setDataMode("degraded");
+      }
     }
     // DEMO MODE: credentials are never validated client-side against a stored
     // secret. Any known account with a non-trivial password is accepted so the
