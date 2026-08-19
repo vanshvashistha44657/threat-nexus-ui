@@ -47,12 +47,25 @@ export const useAuthStore = create<AuthState>()(
       name: "sentinelops.auth",
       partialize: (s) => ({ user: s.user, status: s.status }),
       onRehydrateStorage: () => () => {
-        useAuthStore.setState({ hydrated: true });
+        markHydrated();
       },
     },
   ),
 );
 
+function markHydrated() {
+  if (!useAuthStore.getState().hydrated) useAuthStore.setState({ hydrated: true });
+}
+
+// Guarantee the flag flips on the client even if rehydration already finished
+// (or failed) before the subscription above was registered.
+if (typeof window !== "undefined") {
+  if (useAuthStore.persist.hasHydrated()) markHydrated();
+  useAuthStore.persist.onFinishHydration(() => markHydrated());
+  void Promise.resolve().then(markHydrated);
+}
+
 export function useCurrentUser() {
   return useAuthStore((s) => s.user);
 }
+
