@@ -16,6 +16,7 @@ import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as AuthenticatedAssetManagementRouteImport } from './routes/_authenticated/asset-management'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated/assets'
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -64,6 +65,12 @@ const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAssetManagementRoute =
+  AuthenticatedAssetManagementRouteImport.update({
+    id: '/asset-management',
+    path: '/asset-management',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAssetsRoute = AuthenticatedAssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
+  '/asset-management': typeof AuthenticatedAssetManagementRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -163,6 +171,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
+  '/asset-management': typeof AuthenticatedAssetManagementRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -186,6 +195,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
+  '/_authenticated/asset-management': typeof AuthenticatedAssetManagementRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/alerts'
+    | '/asset-management'
     | '/assets'
     | '/cases'
     | '/dashboard'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/admin'
     | '/alerts'
+    | '/asset-management'
     | '/assets'
     | '/cases'
     | '/dashboard'
@@ -252,6 +264,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/admin'
     | '/_authenticated/alerts'
+    | '/_authenticated/asset-management'
     | '/_authenticated/assets'
     | '/_authenticated/cases'
     | '/_authenticated/dashboard'
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/alerts'
       fullPath: '/alerts'
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/asset-management': {
+      id: '/_authenticated/asset-management'
+      path: '/asset-management'
+      fullPath: '/asset-management'
+      preLoaderRoute: typeof AuthenticatedAssetManagementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/assets': {
@@ -423,6 +443,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
+  AuthenticatedAssetManagementRoute: typeof AuthenticatedAssetManagementRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -441,6 +462,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
+  AuthenticatedAssetManagementRoute: AuthenticatedAssetManagementRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
