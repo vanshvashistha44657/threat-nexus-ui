@@ -23,7 +23,9 @@ import { Route as AuthenticatedDetectionRulesRouteImport } from './routes/_authe
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedIocRouteImport } from './routes/_authenticated/ioc'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedThreatHuntingRouteImport } from './routes/_authenticated/threat-hunting'
 import { Route as AuthenticatedThreatIntelligenceRouteImport } from './routes/_authenticated/threat-intelligence'
 
@@ -98,9 +100,19 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedThreatHuntingRoute =
@@ -130,7 +142,9 @@ export interface FileRoutesByFullPath {
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
 }
@@ -148,7 +162,9 @@ export interface FileRoutesByTo {
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
 }
@@ -168,7 +184,9 @@ export interface FileRoutesById {
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/ioc': typeof AuthenticatedIocRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/_authenticated/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
 }
@@ -188,7 +206,9 @@ export interface FileRouteTypes {
     | '/incidents'
     | '/ioc'
     | '/notifications'
+    | '/profile'
     | '/reports'
+    | '/settings'
     | '/threat-hunting'
     | '/threat-intelligence'
   fileRoutesByTo: FileRoutesByTo
@@ -206,7 +226,9 @@ export interface FileRouteTypes {
     | '/incidents'
     | '/ioc'
     | '/notifications'
+    | '/profile'
     | '/reports'
+    | '/settings'
     | '/threat-hunting'
     | '/threat-intelligence'
   id:
@@ -225,7 +247,9 @@ export interface FileRouteTypes {
     | '/_authenticated/incidents'
     | '/_authenticated/ioc'
     | '/_authenticated/notifications'
+    | '/_authenticated/profile'
     | '/_authenticated/reports'
+    | '/_authenticated/settings'
     | '/_authenticated/threat-hunting'
     | '/_authenticated/threat-intelligence'
   fileRoutesById: FileRoutesById
@@ -338,11 +362,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports': {
       id: '/_authenticated/reports'
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/threat-hunting': {
@@ -372,7 +410,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedIocRoute: typeof AuthenticatedIocRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedThreatHuntingRoute: typeof AuthenticatedThreatHuntingRoute
   AuthenticatedThreatIntelligenceRoute: typeof AuthenticatedThreatIntelligenceRoute
 }
@@ -387,7 +427,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedIocRoute: AuthenticatedIocRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedThreatHuntingRoute: AuthenticatedThreatHuntingRoute,
   AuthenticatedThreatIntelligenceRoute: AuthenticatedThreatIntelligenceRoute,
 }
