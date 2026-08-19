@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
@@ -21,6 +22,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingApprovalRoute = PendingApprovalRouteImport.update({
+  id: '/pending-approval',
+  path: '/pending-approval',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -36,11 +42,13 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
 }
@@ -48,18 +56,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/register' | '/dashboard'
+  fullPaths: '/' | '/pending-approval' | '/register' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/register' | '/dashboard'
+  to: '/' | '/pending-approval' | '/register' | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/pending-approval'
     | '/register'
     | '/_authenticated/dashboard'
   fileRoutesById: FileRoutesById
@@ -67,6 +77,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  PendingApprovalRoute: typeof PendingApprovalRoute
   RegisterRoute: typeof RegisterRoute
 }
 
@@ -84,6 +95,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pending-approval': {
+      id: '/pending-approval'
+      path: '/pending-approval'
+      fullPath: '/pending-approval'
+      preLoaderRoute: typeof PendingApprovalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -117,6 +135,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  PendingApprovalRoute: PendingApprovalRoute,
   RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
