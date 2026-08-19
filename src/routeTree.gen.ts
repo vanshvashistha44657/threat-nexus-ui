@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as AuthenticatedAssetsRouteImport } from './routes/_authenticated/assets'
 import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
@@ -21,6 +22,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDetectionRulesRouteImport } from './routes/_authenticated/detection-rules'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedIocRouteImport } from './routes/_authenticated/ioc'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedThreatHuntingRouteImport } from './routes/_authenticated/threat-hunting'
 import { Route as AuthenticatedThreatIntelligenceRouteImport } from './routes/_authenticated/threat-intelligence'
@@ -48,6 +50,11 @@ const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   id: '/alerts',
@@ -85,6 +92,12 @@ const AuthenticatedIocRoute = AuthenticatedIocRouteImport.update({
   path: '/ioc',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -108,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
@@ -115,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
@@ -124,6 +139,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/assets': typeof AuthenticatedAssetsRoute
   '/cases': typeof AuthenticatedCasesRoute
@@ -131,6 +147,7 @@ export interface FileRoutesByTo {
   '/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/ioc': typeof AuthenticatedIocRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
@@ -142,6 +159,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/pending-approval': typeof PendingApprovalRoute
   '/register': typeof RegisterRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
   '/_authenticated/assets': typeof AuthenticatedAssetsRoute
   '/_authenticated/cases': typeof AuthenticatedCasesRoute
@@ -149,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated/detection-rules': typeof AuthenticatedDetectionRulesRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/ioc': typeof AuthenticatedIocRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/threat-hunting': typeof AuthenticatedThreatHuntingRoute
   '/_authenticated/threat-intelligence': typeof AuthenticatedThreatIntelligenceRoute
@@ -160,6 +179,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/pending-approval'
     | '/register'
+    | '/admin'
     | '/alerts'
     | '/assets'
     | '/cases'
@@ -167,6 +187,7 @@ export interface FileRouteTypes {
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/notifications'
     | '/reports'
     | '/threat-hunting'
     | '/threat-intelligence'
@@ -176,6 +197,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/pending-approval'
     | '/register'
+    | '/admin'
     | '/alerts'
     | '/assets'
     | '/cases'
@@ -183,6 +205,7 @@ export interface FileRouteTypes {
     | '/detection-rules'
     | '/incidents'
     | '/ioc'
+    | '/notifications'
     | '/reports'
     | '/threat-hunting'
     | '/threat-intelligence'
@@ -193,6 +216,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/pending-approval'
     | '/register'
+    | '/_authenticated/admin'
     | '/_authenticated/alerts'
     | '/_authenticated/assets'
     | '/_authenticated/cases'
@@ -200,6 +224,7 @@ export interface FileRouteTypes {
     | '/_authenticated/detection-rules'
     | '/_authenticated/incidents'
     | '/_authenticated/ioc'
+    | '/_authenticated/notifications'
     | '/_authenticated/reports'
     | '/_authenticated/threat-hunting'
     | '/_authenticated/threat-intelligence'
@@ -250,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/alerts': {
       id: '/_authenticated/alerts'
       path: '/alerts'
@@ -299,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIocRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports': {
       id: '/_authenticated/reports'
       path: '/reports'
@@ -324,6 +363,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
   AuthenticatedAssetsRoute: typeof AuthenticatedAssetsRoute
   AuthenticatedCasesRoute: typeof AuthenticatedCasesRoute
@@ -331,12 +371,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDetectionRulesRoute: typeof AuthenticatedDetectionRulesRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedIocRoute: typeof AuthenticatedIocRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedThreatHuntingRoute: typeof AuthenticatedThreatHuntingRoute
   AuthenticatedThreatIntelligenceRoute: typeof AuthenticatedThreatIntelligenceRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
   AuthenticatedAssetsRoute: AuthenticatedAssetsRoute,
   AuthenticatedCasesRoute: AuthenticatedCasesRoute,
@@ -344,6 +386,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDetectionRulesRoute: AuthenticatedDetectionRulesRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedIocRoute: AuthenticatedIocRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedThreatHuntingRoute: AuthenticatedThreatHuntingRoute,
   AuthenticatedThreatIntelligenceRoute: AuthenticatedThreatIntelligenceRoute,
