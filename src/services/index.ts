@@ -7,7 +7,9 @@
  */
 import { apiFetch, ApiError, IS_LIVE_BACKEND } from "./api-client";
 import { getDemoDataset, mutateDataset } from "./demo-data";
+import { exportReport, type ExportFormat } from "./report-export";
 import type {
+  ActiveSession,
   AdminStats,
   AlertEvent,
   AlertStatus,
@@ -32,7 +34,8 @@ import type {
 } from "./types";
 
 export * from "./types";
-export { IS_LIVE_BACKEND, ApiError } from "./api-client";
+export { exportReport, type ExportFormat, type ExportResult } from "./report-export";
+export { IS_LIVE_BACKEND, API_BASE_URL, ApiError } from "./api-client";
 
 /** Simulated network latency so loading/skeleton states are exercised. */
 const LATENCY = 220;
@@ -43,10 +46,48 @@ function demo<T>(value: T | (() => T), ms = LATENCY): Promise<T> {
   );
 }
 
-/** Try the live backend, fall back to the seeded dataset in demo mode. */
+/**
+ * Data-source mode, observable by the UI.
+ *  - "live"      : VITE_API_BASE_URL is set and the FastAPI backend answers.
+ *  - "degraded"  : a backend is configured but unreachable / not implemented,
+ *                  so the seeded dataset is serving this session.
+ *  - "demo"      : no backend configured.
+ */
+export type DataMode = "live" | "degraded" | "demo";
+let dataMode: DataMode = IS_LIVE_BACKEND ? "live" : "demo";
+const modeListeners = new Set<(m: DataMode) => void>();
+
+export const getDataMode = () => dataMode;
+export function subscribeDataMode(fn: (m: DataMode) => void) {
+  modeListeners.add(fn);
+  return () => modeListeners.delete(fn);
+}
+function setDataMode(next: DataMode) {
+  if (dataMode === next) return;
+  dataMode = next;
+  modeListeners.forEach((fn) => fn(next));
+}
+
+/** Statuses that mean "this endpoint cannot serve us", not "you are denied". */
+const FALLBACK_STATUSES = [0, 404, 405, 501, 502, 503, 504];
+
+/**
+ * Try the live backend; fall back to the seeded dataset when it is unreachable
+ * or the endpoint is not implemented yet. Authentication and authorisation
+ * failures (401/403/422) always propagate — they are real answers.
+ */
 async function resolve<T>(path: string, fallback: () => T, init?: RequestInit): Promise<T> {
-  if (IS_LIVE_BACKEND) return apiFetch<T>(path, init);
-  return demo(fallback);
+  if (!IS_LIVE_BACKEND) return demo(fallback);
+  try {
+    const result = await apiFetch<T>(path, init);
+    setDataMode("live");
+    return result;
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : -1;
+    if (!FALLBACK_STATUSES.includes(status)) throw error;
+    setDataMode("degraded");
+    return demo(fallback);
+  }
 }
 
 function paginate<T>(items: T[], page: number, pageSize: number): Paginated<T> {
@@ -107,14 +148,23 @@ export const ADMIN_EMAIL: string =
 const auth = {
   async login({ email, password }: LoginPayload): Promise<{ user: AuthUser; token: string }> {
     if (IS_LIVE_BACKEND) {
-      const res = await apiFetch<{ access_token: string; user: User }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ username: email, password }),
-      });
-      return {
-        token: res.access_token,
-        user: { ...res.user, permissions: permissionsFor(res.user.role) },
-      };
+      try {
+        const res = await apiFetch<{ access_token: string; user: User }>("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ username: email, password }),
+        });
+        setDataMode("live");
+        return {
+          token: res.access_token,
+          user: { ...res.user, permissions: permissionsFor(res.user.role) },
+        };
+      } catch (error) {
+        const status = error instanceof ApiError ? error.status : -1;
+        // Rejected credentials must surface; an unreachable API falls through
+        // to the seeded dataset so the console stays demonstrable.
+        if (!FALLBACK_STATUSES.includes(status)) throw error;
+        setDataMode("degraded");
+      }
     }
     // DEMO MODE: credentials are never validated client-side against a stored
     // secret. Any known account with a non-trivial password is accepted so the
@@ -172,6 +222,30 @@ const auth = {
     return resolve("/auth/sessions", () => getDemoDataset().sessions);
   },
 
+  /**
+   * Session heartbeat. The backend refreshes `last_activity` for the bearer
+   * token, which is what the Admin Portal's active-user view reads.
+   * Endpoint: POST /auth/heartbeat
+   */
+  async heartbeat(): Promise<void> {
+    if (!IS_LIVE_BACKEND) return;
+    try {
+      await apiFetch<{ ok: true }>("/auth/heartbeat", { method: "POST" });
+    } catch {
+      /* heartbeat is best-effort; connectivity errors surface elsewhere */
+    }
+  },
+
+  /** Terminates the caller's own session server-side. POST /auth/logout */
+  async logout(): Promise<void> {
+    if (!IS_LIVE_BACKEND) return;
+    try {
+      await apiFetch<{ ok: true }>("/auth/logout", { method: "POST" });
+    } catch {
+      /* the local session is cleared regardless */
+    }
+  },
+
   async revokeSession(id: string) {
     return resolve<{ ok: true }>(`/auth/sessions/${id}`, () => {
       mutateDataset((d) => {
@@ -181,6 +255,7 @@ const auth = {
     }, { method: "DELETE" });
   },
 };
+
 
 /* ------------------------------------------------------------- dashboard */
 
@@ -676,6 +751,21 @@ const reports = {
   list(): Promise<ReportItem[]> {
     return resolve("/reports", () => getDemoDataset().reports);
   },
+  get(id: string): Promise<ReportItem> {
+    return resolve(`/reports/${id}`, () => {
+      const found = getDemoDataset().reports.find((r) => r.id === id);
+      if (!found) throw new ApiError(404, "Report not found.");
+      return found;
+    });
+  },
+  /**
+   * Downloads a report. Tries GET /reports/{id}/export?format=… on the FastAPI
+   * backend first and renders in-browser from the same record if that endpoint
+   * is not implemented. See ./report-export.ts.
+   */
+  export(report: ReportItem, format: ExportFormat) {
+    return exportReport(report, format);
+  },
   generate(type: ReportItem["type"]) {
     return resolve<ReportItem>(
       "/reports",
@@ -777,6 +867,60 @@ const admin = {
   },
   sessions(): Promise<Session[]> {
     return resolve("/admin/sessions", () => getDemoDataset().sessions);
+  },
+
+  /**
+   * Live authenticated sessions. GET /admin/sessions must return one row per
+   * *session*, not per login attempt, including last_activity so the UI can
+   * derive online / idle / offline.
+   */
+  activeSessions(): Promise<ActiveSession[]> {
+    return resolve("/admin/sessions", () => {
+      const d = getDemoDataset();
+      const byUser = new Map(d.users.map((u) => [u.id, u]));
+      return d.sessions.map<ActiveSession>((s) => {
+        const u = byUser.get(s.userId) ?? d.users[0]!;
+        return {
+          id: s.id,
+          userId: s.userId,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          loginAt: s.startedAt,
+          lastActivity: s.lastActive,
+          ip: s.ip,
+          device: s.device,
+          location: s.location,
+          current: s.current,
+        };
+      });
+    });
+  },
+
+  /** Administrative session revocation. DELETE /admin/sessions/{id} */
+  revokeSession(id: string) {
+    return resolve<{ ok: true }>(
+      `/admin/sessions/${id}`,
+      () => {
+        mutateDataset((d) => {
+          const s = d.sessions.find((x) => x.id === id);
+          d.sessions = d.sessions.filter((x) => x.id !== id);
+          d.auditLogs.unshift({
+            id: `aud-${Date.now()}`,
+            user: ADMIN_EMAIL,
+            action: "session.revoke",
+            resource: `sessions/${id}`,
+            timestamp: new Date().toISOString(),
+            ip: s?.ip ?? "-",
+            previousValue: null,
+            newValue: null,
+            result: "success",
+          });
+        });
+        return { ok: true };
+      },
+      { method: "DELETE" },
+    );
   },
 };
 

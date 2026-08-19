@@ -787,6 +787,29 @@ function buildDataset(): DemoDataset {
 
   const count = (s: Severity) => alerts.filter((a) => a.severity === s).length;
 
+  // Period-over-period trends are *derived* from the dataset (last 24h vs the
+  // preceding 24h) so the dashboard never renders an invented delta.
+  const DAY = 86400000;
+  const pct = (current: number, previous: number) =>
+    previous === 0 ? (current === 0 ? 0 : 100) : Math.round(((current - previous) / previous) * 1000) / 10;
+  const inWindow = (iso: string, from: number, to: number) => {
+    const t = new Date(iso).getTime();
+    return t >= from && t < to;
+  };
+  const severityDelta = (s: Severity) =>
+    pct(
+      alerts.filter((a) => a.severity === s && inWindow(a.timestamp, base - DAY, base + DAY)).length,
+      alerts.filter((a) => a.severity === s && inWindow(a.timestamp, base - 2 * DAY, base - DAY)).length,
+    );
+  const incidentDelta = pct(
+    incidents.filter((i) => inWindow(i.createdAt, base - DAY, base + DAY)).length,
+    incidents.filter((i) => inWindow(i.createdAt, base - 2 * DAY, base - DAY)).length,
+  );
+  const caseDelta = pct(
+    cases.filter((c) => inWindow(c.createdAt, base - 7 * DAY, base + DAY)).length,
+    cases.filter((c) => inWindow(c.createdAt, base - 14 * DAY, base - 7 * DAY)).length,
+  );
+
   const metrics: DashboardMetrics = {
     criticalAlerts: count("critical"),
     highAlerts: count("high"),
@@ -828,6 +851,12 @@ function buildDataset(): DemoDataset {
       count: 5 + Math.floor(rng() * 60),
       country: pick(rng, COUNTRIES),
     })),
+    trends: {
+      criticalAlerts: severityDelta("critical"),
+      highAlerts: severityDelta("high"),
+      openIncidents: incidentDelta,
+      activeCases: caseDelta,
+    },
     fpTrend: Array.from({ length: 14 }, (_, d) => ({
       day: new Date(base - (13 - d) * 86400000).toISOString().slice(5, 10),
       rate: 6 + Math.round(rng() * 140) / 10,

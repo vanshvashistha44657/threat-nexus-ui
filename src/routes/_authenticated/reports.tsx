@@ -1,14 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Download, FileBarChart } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Download, FileBarChart, FileSpreadsheet, FileText, Loader2, Table2 } from "lucide-react";
 import { PageHeader, Panel } from "@/components/soc/panels";
 import { StatusBadge } from "@/components/soc/badges";
 import { relativeTime } from "@/components/soc/timeline";
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton, ErrorState } from "@/components/soc/states";
-import { useReportGenerate, useReports } from "@/hooks/use-soc-data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useReportExport, useReportGenerate, useReports } from "@/hooks/use-soc-data";
 import { useAuthStore } from "@/stores/auth-store";
-import type { ReportItem } from "@/services";
-import { toast } from "sonner";
+import type { ExportFormat, ReportItem } from "@/services";
 
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
@@ -21,6 +29,54 @@ export const Route = createFileRoute("/_authenticated/reports")({
   }),
   component: ReportsPage,
 });
+
+const FORMATS: { format: ExportFormat; label: string; hint: string; icon: typeof FileText }[] = [
+  { format: "pdf", label: "PDF document", hint: "Branded, print-ready", icon: FileText },
+  { format: "xlsx", label: "Excel workbook", hint: "Overview + summary sheets", icon: FileSpreadsheet },
+  { format: "csv", label: "CSV data", hint: "Raw metric rows", icon: Table2 },
+];
+
+function ExportMenu({ report }: { report: ReportItem }) {
+  const exporter = useReportExport();
+  const [busy, setBusy] = useState<ExportFormat | null>(null);
+  const disabled = report.status !== "ready" || busy !== null;
+
+  const run = async (format: ExportFormat) => {
+    setBusy(format);
+    try {
+      await exporter.mutateAsync({ report, format });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="mt-3 w-full justify-between" disabled={disabled}>
+          <span className="flex items-center gap-2">
+            {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
+            {busy ? `Exporting ${busy.toUpperCase()}…` : report.status === "ready" ? "Export" : `Report ${report.status}`}
+          </span>
+          <ChevronDown className="size-3.5 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel className="text-xs">Download “{report.name}”</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {FORMATS.map((f) => (
+          <DropdownMenuItem key={f.format} onSelect={() => void run(f.format)} className="gap-2">
+            <f.icon className="size-4 text-primary" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-xs font-medium">{f.label}</span>
+              <span className="text-[10px] text-muted-foreground">{f.hint}</span>
+            </span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 const TYPES: { type: ReportItem["type"]; label: string }[] = [
   { type: "daily_soc", label: "Daily SOC summary" },
@@ -75,9 +131,7 @@ function ReportsPage() {
               ))}
             </dl>
             <p className="mono mt-3 text-[10px] text-muted-foreground">{r.generatedBy} · {relativeTime(r.generatedAt)}</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => toast.info("Export queued — PDF/CSV delivery is handled by the reporting service.")}>
-              <Download className="size-3.5" /> Export
-            </Button>
+            <ExportMenu report={r} />
           </article>
         ))}
       </div>

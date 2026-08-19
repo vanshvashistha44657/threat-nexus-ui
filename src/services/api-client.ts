@@ -83,3 +83,29 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }
+
+/**
+ * Binary variant used by report export. Returns the raw Blob produced by the
+ * FastAPI backend (e.g. GET /reports/{id}/export?format=pdf).
+ */
+export async function apiFetchBlob(path: string, init: RequestInit = {}): Promise<Blob> {
+  if (!IS_LIVE_BACKEND) {
+    throw new ApiError(503, "No backend configured (VITE_API_BASE_URL is empty).");
+  }
+  const token = getAccessToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init.headers ?? {}),
+      },
+    });
+  } catch {
+    throw new ApiError(0, "Network failure — the SentinelOps backend is unreachable.");
+  }
+  if (!res.ok) throw new ApiError(res.status, messageFor(res.status));
+  return await res.blob();
+}
+

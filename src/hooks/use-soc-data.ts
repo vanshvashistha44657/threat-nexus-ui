@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { services, type AlertFilters, type HuntQuery } from "@/services";
+import {
+  services,
+  type AlertFilters,
+  type ExportFormat,
+  type HuntQuery,
+  type ReportItem,
+} from "@/services";
 import { toast } from "sonner";
 
 export const qk = {
@@ -25,6 +31,7 @@ export const qk = {
   adminUsers: ["admin", "users"] as const,
   auditLogs: (s: string) => ["admin", "audit", s] as const,
   sessions: ["auth", "sessions"] as const,
+  activeSessions: ["admin", "active-sessions"] as const,
 };
 
 export const useMetrics = () =>
@@ -211,6 +218,25 @@ export function useReportGenerate() {
   });
 }
 
+/**
+ * Report export (PDF / XLSX / CSV). Exposes isPending so the UI can show a
+ * per-format progress state, and reports the file that was written.
+ */
+export function useReportExport() {
+  return useMutation({
+    mutationFn: (v: { report: ReportItem; format: ExportFormat }) =>
+      services.reports.export(v.report, v.format),
+    onSuccess: (res) =>
+      toast.success(`Exported ${res.filename}`, {
+        description:
+          res.source === "backend"
+            ? `${(res.bytes / 1024).toFixed(1)} KB rendered by the SentinelOps API`
+            : `${(res.bytes / 1024).toFixed(1)} KB rendered locally from the report record`,
+      }),
+    onError: (e: Error) => toast.error("Export failed", { description: e.message }),
+  });
+}
+
 export const useNotifications = () =>
   useQuery({ queryKey: qk.notifications, queryFn: () => services.notifications.list() });
 export function useNotificationActions() {
@@ -233,6 +259,30 @@ export const useAdminUsers = () => useQuery({ queryKey: qk.adminUsers, queryFn: 
 export const useAuditLogs = (search: string) =>
   useQuery({ queryKey: qk.auditLogs(search), queryFn: () => services.admin.auditLogs(search) });
 export const useSessions = () => useQuery({ queryKey: qk.sessions, queryFn: () => services.auth.sessions() });
+/** Live authenticated sessions, refreshed on an interval and on realtime events. */
+export const useActiveSessions = () =>
+  useQuery({
+    queryKey: qk.activeSessions,
+    queryFn: () => services.admin.activeSessions(),
+    refetchInterval: 20_000,
+    refetchOnWindowFocus: true,
+  });
+
+export function useAdminSessionActions() {
+  const qc = useQueryClient();
+  return {
+    revoke: useMutation({
+      mutationFn: (id: string) => services.admin.revokeSession(id),
+      onSuccess: () => {
+        void qc.invalidateQueries({ queryKey: qk.activeSessions });
+        void qc.invalidateQueries({ queryKey: ["admin"] });
+        toast.success("Session revoked", { description: "The action was written to the audit log." });
+      },
+      onError: (e: Error) => toast.error(e.message),
+    }),
+  };
+}
+
 export function useUserAdminActions() {
   const qc = useQueryClient();
   const done = (m: string) => {

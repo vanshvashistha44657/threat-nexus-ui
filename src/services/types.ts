@@ -313,6 +313,15 @@ export interface DashboardMetrics {
   topAssets: { asset: string; alerts: number }[];
   topSourceIps: { ip: string; count: number; country: string }[];
   fpTrend: { day: string; rate: number }[];
+  /**
+   * Period-over-period percentage change per metric key, computed by the
+   * backend (or the demo dataset) — never hard-coded in the UI. Keys are
+   * DashboardMetrics numeric field names; a missing key hides the trend chip.
+   */
+  trends?: Partial<Record<
+    "criticalAlerts" | "highAlerts" | "openIncidents" | "activeCases" | "iocMatches" | "assetsAtRisk" | "mttrMinutes" | "falsePositiveRate",
+    number
+  >>;
 }
 
 export interface SystemHealthItem {
@@ -336,4 +345,23 @@ export interface Paginated<T> {
   total: number;
   page: number;
   pageSize: number;
+}
+
+/**
+ * A live authenticated session as reported by the backend
+ * (GET /admin/sessions). `lastActivity` drives the online/idle/offline state
+ * shown in the Admin Portal — it is never derived from login attempts.
+ */
+export interface ActiveSession {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: Role;
+  loginAt: string;
+  lastActivity: string;
+  ip: string;
+  device: string;
+  location: string;
+  current: boolean;
 }
